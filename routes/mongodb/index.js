@@ -21,8 +21,148 @@ router.post('/user', async (req, res, next) => {
   res.send(util.success(result.data))
 })
 
+// 分析 给出病情和建议
 router.post('/tb/health/report', async (req, res, next) => {
-  const result = await TbHealthReportModel(req.body).save()
+  const param = util.convertObject(req.body)
+
+  const calcAgeScore = age => {
+    let score = 0
+    if(age>=20 && age <= 34){
+      score = -9
+    }else if(age>=35 && age <= 39){
+      score = -4
+    }else if(age>=40 && age <= 44){
+      score = 0
+    }else if(age>=45 && age <= 49){
+      score = 3
+    }else if(age>=50 && age <= 54){
+      score = 6
+    }else if(age>=55 && age <= 59){
+      score = 8
+    }else if(age>=60 && age <= 64){
+      score = 10
+    }else if(age>=65 && age <= 69){
+      score = 11
+    }else if(age>=70 && age <= 74){
+      score = 12
+    }else if(age>=75 && age <= 79){
+      score = 13
+    }
+    return score
+  }
+  const calcCholesterolScore = (cholesterol,age) =>{
+    let score = 0
+    if(cholesterol<160){
+      score = 0
+    }else if(cholesterol>=160 && cholesterol<=199){
+      if(age >= 20 && age<=39){
+        score = 4
+      }else if(age >= 40 && age<=49){
+        score = 3
+      }else if(age >= 50 && age<=59){
+        score = 2
+      }else if(age >= 60 && age<=69){
+        score = 1
+      }else if(age >= 70 && age<=79){
+        score = 0
+      }
+    }else if(cholesterol>=200 && cholesterol<=239){
+      if(age >= 20 && age<=39){
+        score = 7
+      }else if(age >= 40 && age<=49){
+        score = 5
+      }else if(age >= 50 && age<=59){
+        score = 3
+      }else if(age >= 60 && age<=69){
+        score = 1
+      }else if(age >= 70 && age<=79){
+        score = 0
+      }
+    }else if(cholesterol>=240 && cholesterol<=279){
+      if(age >= 20 && age<=39){
+        score = 9
+      }else if(age >= 40 && age<=49){
+        score = 6
+      }else if(age >= 50 && age<=59){
+        score = 4
+      }else if(age >= 60 && age<=69){
+        score = 2
+      }else if(age >= 70 && age<=79){
+        score = 1
+      }
+    }else if(cholesterol>=280){
+      if(age >= 20 && age<=39){
+        score = 11
+      }else if(age >= 40 && age<=49){
+        score = 8
+      }else if(age >= 50 && age<=59){
+        score = 5
+      }else if(age >= 60 && age<=69){
+        score = 3
+      }else if(age >= 70 && age<=79){
+        score = 1
+      }
+    }
+
+    return score
+  }
+  const calcHDLCScore = hdlc =>{
+    let score = 0
+    if(hdlc >= 60){
+      score = -1
+    }else if(hdlc >= 50 && hdlc <= 59){
+      score = 0
+    }else if(hdlc >= 40 && hdlc <= 49){
+      score = 1
+    }else if(hdlc <40){
+      score = 2
+    }
+    return score
+  }
+  const calcSBPScore = sbp =>{
+    let score = 0
+    if(sbp < 120){
+      score = 0
+    }else if(sbp >= 120 && sbp <= 129){
+      score = 1
+    }else if(sbp >= 130 && sbp <= 139){
+      score = 2
+    }else if(sbp >= 140 && sbp <= 149){
+      score = 2
+    }else if(sbp >= 160){
+      score = 3
+    }
+    return score
+  }
+  const calcSmokeScore = (smoke,age)=>{
+    let score = 0
+    if(age >= 20 && age<=39){
+      score = smoke == 'Y' ? 8 : 0
+    }else if(age >= 40 && age<=49){
+      score = smoke == 'Y' ? 5 : 0
+    }else if(age >= 50 && age<=59){
+      score = smoke == 'Y' ? 3 : 0
+    }else if(age >= 60 && age<=69){
+      score = smoke == 'Y' ? 1 : 0
+    }else if(age >= 70 && age<=79){
+      score = smoke == 'Y' ? 1 : 0
+    }
+
+    return score
+  }
+
+  // 冠心病概率 sbp收缩压 cholesterol胆固醇
+  const {age, cholesterol,hdlc,smoke,sbp} = param
+  param.framingham = calcAgeScore(age)
+      + calcCholesterolScore(cholesterol,age)
+      + calcHDLCScore(hdlc)
+      + calcSBPScore(sbp)
+      + calcSmokeScore(smoke,age)
+
+  //体重指数(BMI)=体重(kg)÷身高^2(m)
+  param.bmi = param.weight / (param.stature*param.stature)
+
+  const result = await TbHealthReportModel(param).save()
   res.send(util.success(result))
 })
 

@@ -49,19 +49,38 @@ module.exports = {
     toUnderScoreCase(str){ // to 下划线
         return str.replace(/([A-Z])/g,"_$1").toLowerCase()
     },
-    convertObject(obj){
+    convertObject(obj){ // 转换书写方式，mongo都是下划线的
+        let type = ''
+        for (let key in obj) {
+            if(key.includes('_')){
+                type = 'under_score_case'
+                break
+            }
 
-        for (let key in row) {
-            let camelKey = util.toCamel(key)
-            let value = row[key]  // real value
-
-            // check if convert datetime to string
-            if (/.\d{4} \d{2}:\d{2}:\d{2} GMT\+0800 ./.test(value)) {
-                camelRow[camelKey] = util.date.utcToDate(value)
-            } else {
-                camelRow[camelKey] = value
+            if(/[A-Z]/.test(key)){
+                type = 'camel'
             }
         }
+
+        let finalObj = {}
+        for (let key in obj) {
+            let finalKey = key
+            if(type === 'camel'){ // 如parentId
+                finalKey = this.toUnderScoreCase(key)
+            }else if(type === 'under_score_case'){
+                finalKey = this.toCamel(key)
+            }
+
+            let value = obj[key]  // real value
+            // check if convert datetime to string
+            if (/.\d{4} \d{2}:\d{2}:\d{2} GMT\+0800 ./.test(value)) {
+                finalObj[finalKey] = this.date.utcToDate(value)
+            } else {
+                finalObj[finalKey] = value
+            }
+        }
+
+        return finalObj
     },
     isArray(o){
         return Object.prototype.toString.call(o) === '[object Array]'
