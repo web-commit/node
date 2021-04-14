@@ -151,13 +151,25 @@ router.post('/tb/health/report', async (req, res, next) => {
     return score
   }
 
-  // 冠心病概率 sbp收缩压 cholesterol胆固醇
+  // sbp收缩压 cholesterol胆固醇
   const {age, cholesterol,hdlc,smoke,sbp} = param
-  param.framingham = calcAgeScore(age)
+
+  let totalScore = calcAgeScore(age)
       + calcCholesterolScore(cholesterol,age)
       + calcHDLCScore(hdlc)
       + calcSBPScore(sbp)
       + calcSmokeScore(smoke,age)
+
+  // 冠心病总分
+  param.heartDiseaseScore = totalScore
+  if(totalScore < 0){
+    param.heartDiseaseProbability = '<1%'
+  }else if(totalScore >=17){
+    param.heartDiseaseProbability = '>=30%'
+  }else{
+    const p = ['1%','1%','1%','1%','1%','2%','2%','3%','4%','5%','6%','8%','10%','12%','16%','20%','25%']
+    param.heartDiseaseProbability = p[totalScore]
+  }
 
   //体重指数(BMI)=体重(kg)÷身高^2(m)
   param.bmi = param.weight / (param.stature*param.stature)
