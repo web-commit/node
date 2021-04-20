@@ -171,16 +171,20 @@ router.post('/tb/health/report', async (req, res, next) => {
     param.heartDiseaseProbability = p[totalScore]
   }
 
-  //体重指数(BMI)=体重(kg)÷身高^2(m)
-  param.bmi = param.weight / (param.stature*param.stature)
+  //体重指数(BMI)=体重(kg)÷身高(m)^2
+  let height = param.stature / 100
+  param.bmi = (param.weight / (height*height)).toFixed(2)
 
   const result = await TbHealthReportModel(param).save()
   res.send(util.success(result))
 })
 
 router.get('/tb/health/report', async (req, res, next) => {
-  console.log("/tb/health/report", req.query)
-  const list = await TbHealthReportModel.find({})
+  let param = {}
+  if(req.query._id){
+    param = {"_id":util.objectId(req.query._id)}
+  }
+  const list = await TbHealthReportModel.find(param)
   res.send(util.success(list))
 })
 

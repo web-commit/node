@@ -55,3 +55,23 @@ app.use(function(req, res, next) {
 //端口同springboot一致
 const port = 8080
 app.listen(port, () => console.log(`** Express started on port ${port}`))
+
+
+const ws = require("nodejs-websocket");
+const server = ws.createServer(function(conn){
+    conn.on("text", function (jsonText) {
+        const {clientId, message} = JSON.parse(jsonText)
+        conn.clientId = clientId
+        server.connections.forEach(connection=>{
+            if (connection.clientId != clientId && connection.readyState == 1) {
+                connection.sendText(message)
+            }
+        })
+    })
+    conn.on("close", function (code, reason) {
+        console.log("关闭连接")
+    });
+    conn.on("error", function (code, reason) {
+        console.log("异常关闭")
+    });
+}).listen(8081)
