@@ -161,14 +161,14 @@ router.post('/tb/health/report', async (req, res, next) => {
       + calcSmokeScore(smoke,age)
 
   // 冠心病总分
-  param.heartDiseaseScore = totalScore
+  param.heart_disease_score = totalScore
   if(totalScore < 0){
-    param.heartDiseaseProbability = '<1%'
+    param.heart_disease_probability = '<1%'
   }else if(totalScore >=17){
-    param.heartDiseaseProbability = '>=30%'
+    param.heart_disease_probability = '>=30%'
   }else{
     const p = ['1%','1%','1%','1%','1%','2%','2%','3%','4%','5%','6%','8%','10%','12%','16%','20%','25%']
-    param.heartDiseaseProbability = p[totalScore]
+    param.heart_disease_probability = p[totalScore]
   }
 
   //体重指数(BMI)=体重(kg)÷身高(m)^2
@@ -180,9 +180,10 @@ router.post('/tb/health/report', async (req, res, next) => {
 })
 
 router.get('/tb/health/report', async (req, res, next) => {
-  let param = {}
+  console.log()
+  let param = {username: req.query.username}
   if(req.query._id){
-    param = {"_id":util.objectId(req.query._id)}
+    param["_id"] = util.objectId(req.query._id)
   }
   const list = await TbHealthReportModel.find(param)
   res.send(util.success(list))

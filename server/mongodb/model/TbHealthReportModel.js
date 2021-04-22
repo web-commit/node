@@ -3,6 +3,7 @@ const Schema = mongoose.Schema
 
 //  用户对象模型
 const schema = new Schema({
+  username: {type: String, required: true},
   name: {type: String, required: true},
   sex: {type: String},
   age: {type:Number},
