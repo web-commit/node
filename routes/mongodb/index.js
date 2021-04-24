@@ -194,7 +194,7 @@ router.get('/tb/health/report', async (req, res, next) => {
       $lt: new Date(end)
     }
   }
-  const list = await TbHealthReportModel.find(param)
+  const list = await TbHealthReportModel.find(param).sort({create_time:1})
   res.send(util.success(list))
 })
 
