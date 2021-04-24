@@ -180,10 +180,19 @@ router.post('/tb/health/report', async (req, res, next) => {
 })
 
 router.get('/tb/health/report', async (req, res, next) => {
-  console.log()
   let param = {username: req.query.username}
   if(req.query._id){
     param["_id"] = util.objectId(req.query._id)
+  }
+  if(req.query.createTimeArray && req.query.createTimeArray.length == 2){
+    let start = req.query.createTimeArray[0]
+    let end = req.query.createTimeArray[1]
+    start = start.substring(1,11) + " " + start.substring(12,20)
+    end = end.substring(1,11) + " " + end.substring(12,20)
+    param.create_time = {
+      $gte: new Date(start),
+      $lt: new Date(end)
+    }
   }
   const list = await TbHealthReportModel.find(param)
   res.send(util.success(list))
