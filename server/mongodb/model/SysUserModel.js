@@ -5,8 +5,8 @@ const Schema = mongoose.Schema
 const schema = new Schema({
   username: {type: String, required: true},
   password: {type: String, required: true},
-  age: {type:Number},
-  create_time: {type: Date, default: Date.now},
+  nickname: {type: String},
+  type: {type: String, required: true},
 })
 
 // Model是由Schema编译而成的假想（fancy）构造器，具有抽象属性和行为。

@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const util = require('../../server/util')
-const Order = require('../../server/mongodb/model/OrderModel')
 const SysUser = require('../../server/mongodb/model/SysUserModel')
 const TbHealthReportModel = require('../../server/mongodb/model/TbHealthReportModel')
 
@@ -13,12 +12,21 @@ const TbHealthReportModel = require('../../server/mongodb/model/TbHealthReportMo
  */
 
 
-router.post('/user', async (req, res, next) => {
+router.post('/sys/user', async (req, res, next) => {
   const param = req.body
   param.course = util.objectId()
-  const result = await new Order(param).save()
+  param.password = util.md5(param.password)
+  const result = await new SysUser(param).save()
   console.log(result)
   res.send(util.success(result.data))
+})
+router.get('/sys/user/list', async (req, res, next) => {
+  let param = {}
+  if(req.query.nickname){
+    param = {nickname:req.query.nickname}
+  }
+  const list = await SysUser.find(param)
+  res.send(util.success(list))
 })
 
 // 分析 给出病情和建议
@@ -216,7 +224,7 @@ router.post('/login', async (req, res, next) => {
         token: user.id, //暂时无des
         timeout: 30
       },
-      user: user
+      user: list[0]
     }, "登录成功"))
   }
 });
