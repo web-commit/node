@@ -28,6 +28,10 @@ router.get('/sys/user/list', async (req, res, next) => {
   const list = await SysUser.find(param)
   res.send(util.success(list))
 })
+router.delete('/sys/user', async(req, res) => {
+  const result = await SysUser.deleteOne({_id:req.body.id})
+  res.send(util.success(result.data))
+})
 
 // 分析 给出病情和建议
 router.post('/tb/health/report', async (req, res, next) => {
