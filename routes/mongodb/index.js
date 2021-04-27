@@ -14,10 +14,17 @@ const TbHealthReportModel = require('../../server/mongodb/model/TbHealthReportMo
 
 router.post('/sys/user', async (req, res, next) => {
   const param = req.body
-  param.course = util.objectId()
   param.password = util.md5(param.password)
-  const result = await new SysUser(param).save()
-  console.log(result)
+
+  let result
+  if(param._id){ // 更新信息
+    const _id = param._id
+    delete param._id
+    result = await SysUser.findOneAndUpdate({_id:_id}, param)
+  }else{
+    result = await new SysUser(param).save()
+  }
+
   res.send(util.success(result.data))
 })
 router.get('/sys/user/list', async (req, res, next) => {
